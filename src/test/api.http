@@ -1,0 +1,43 @@
+### Create a Customer
+POST http://localhost:8080/customers
+Content-Type: application/json
+
+{
+  "name": "lukas koug",
+  "email": "lukas@gmail.com",
+  "address": "42 paraskevis"
+}
+
+### Create a Product
+POST http://localhost:8080/products
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "price": 14325252.123
+}
+
+### Create an Order
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "customer": {
+    "id": 1
+  },
+  "products": [
+    {
+      "id": 1
+    }
+  ],
+  "status": "Pending"
+}
+
+### Get All Orders
+GET http://localhost:8080/orders
+
+### Get Order by ID
+GET http://localhost:8080/orders/1
+
+
+
