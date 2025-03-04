@@ -2,7 +2,9 @@ package gr.codehub.eshopdemo.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -22,4 +24,10 @@ public class Customer {
     private String email;
 
     private String address;
+
+    @CreationTimestamp  // Automatically sets the timestamp when inserting a new customer
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 }
+
+

@@ -3,6 +3,8 @@ package gr.codehub.eshopdemo.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class CustomerDTO {
@@ -10,4 +12,5 @@ public class CustomerDTO {
     private String name;
     private String email;
     private String address;
+    private LocalDateTime createdAt;
 }
