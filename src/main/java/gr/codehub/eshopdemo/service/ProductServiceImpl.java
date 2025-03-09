@@ -1,33 +1,42 @@
 package gr.codehub.eshopdemo.service;
 
+import gr.codehub.eshopdemo.dto.ProductDTO;
+import gr.codehub.eshopdemo.exception.ProductNotFoundException;
+import gr.codehub.eshopdemo.mapper.ProductMapper;
 import gr.codehub.eshopdemo.model.Product;
 import gr.codehub.eshopdemo.repository.ProductRepository;
-import gr.codehub.eshopdemo.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductDTO> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(productMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
+    public ProductDTO getProductById(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with ID " + id + " not found"));
+        return productMapper.toDTO(product);
     }
 
     @Override
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
+    public ProductDTO saveProduct(ProductDTO productDTO) {
+        Product product = productMapper.toEntity(productDTO);
+        Product savedProduct = productRepository.save(product);
+        return productMapper.toDTO(savedProduct);
     }
 
     @Override
@@ -39,19 +48,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product updateProduct(Long id, Product updatedProduct) {
+    public ProductDTO updateProduct(Long id, ProductDTO updatedProductDTO) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with ID " + id + " not found"));
 
-        existingProduct.setName(updatedProduct.getName());
-        existingProduct.setPrice(updatedProduct.getPrice());
+        existingProduct.setName(updatedProductDTO.getName());
+        existingProduct.setPrice(updatedProductDTO.getPrice());
 
-        return productRepository.save(existingProduct);
+        Product savedProduct = productRepository.save(existingProduct);
+        return productMapper.toDTO(savedProduct);
     }
+
     @Override
-    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) {
-        return productRepository.findByPriceBetween(minPrice, maxPrice);
+    public List<ProductDTO> getProductsByPriceRange(double minPrice, double maxPrice) {
+        return productRepository.findByPriceBetween(minPrice, maxPrice).stream()
+                .map(productMapper::toDTO)
+                .collect(Collectors.toList());
     }
-
-
 }

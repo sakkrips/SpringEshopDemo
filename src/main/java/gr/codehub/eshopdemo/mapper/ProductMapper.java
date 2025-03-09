@@ -2,23 +2,15 @@ package gr.codehub.eshopdemo.mapper;
 
 import gr.codehub.eshopdemo.dto.ProductDTO;
 import gr.codehub.eshopdemo.model.Product;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
-@Component
-public class ProductMapper {
+@Mapper(componentModel = "spring")
+public interface ProductMapper {
+    ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
-    public ProductDTO toDTO(Product product) {
-        ProductDTO dto = new ProductDTO();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setPrice(product.getPrice());
-        return dto;
-    }
+    ProductDTO toDTO(Product product);
 
-    public Product toEntity(ProductDTO dto) {
-        Product product = new Product();
-        product.setName(dto.getName());
-        product.setPrice(dto.getPrice());
-        return product;
-    }
+    Product toEntity(ProductDTO productDTO);
 }

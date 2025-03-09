@@ -1,15 +1,13 @@
 package gr.codehub.eshopdemo.service;
 
-import gr.codehub.eshopdemo.model.Order;
+import gr.codehub.eshopdemo.dto.OrderDTO;
 import java.util.List;
 
 public interface OrderService {
-    List<Order> getAllOrders();
-    Order getOrderById(Long id);
-    Order saveOrder(Order order);
+    List<OrderDTO> getAllOrders();
+    OrderDTO getOrderById(Long id);
+    OrderDTO saveOrder(OrderDTO orderDTO);
     void deleteOrder(Long id);
-    Order updateOrder(Long id, Order updatedOrder);
-    List<Order> getOrdersByCustomerId(Long customerId);
-
-
+    OrderDTO updateOrder(Long id, OrderDTO updatedOrder);
+    List<OrderDTO> getOrdersByCustomerId(Long customerId);
 }

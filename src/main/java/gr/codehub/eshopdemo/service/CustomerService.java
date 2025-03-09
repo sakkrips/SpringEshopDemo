@@ -1,19 +1,18 @@
 package gr.codehub.eshopdemo.service;
 
-import gr.codehub.eshopdemo.model.Customer;
-
+import gr.codehub.eshopdemo.dto.CustomerDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CustomerService {
-    List<Customer> getAllCustomers();
-    Customer getCustomerById(Long id);
-    Customer saveCustomer(Customer customer);
+    List<CustomerDTO> getAllCustomers();
+    CustomerDTO getCustomerById(Long id);
+    CustomerDTO saveCustomer(CustomerDTO customerDTO);
     void deleteCustomer(Long id);
-    Customer updateCustomer(Long id, Customer updatedCustomer);
-    Customer getCustomerByEmail(String email);
-    List<Customer> getCustomersByName(String name);
-    List<Customer> getCustomersByAddress(String address);
-    List<Customer> getCustomersCreatedAfter(LocalDateTime date);
-    List<Customer> getCustomersCreatedBefore(LocalDateTime date);
+    CustomerDTO updateCustomer(Long id, CustomerDTO updatedCustomer);
+    CustomerDTO getCustomerByEmail(String email);
+    List<CustomerDTO> getCustomersByName(String name);
+    List<CustomerDTO> getCustomersByAddress(String address);
+    List<CustomerDTO> getCustomersCreatedAfter(LocalDateTime date);
+    List<CustomerDTO> getCustomersCreatedBefore(LocalDateTime date);
 }

@@ -1,6 +1,8 @@
 package gr.codehub.eshopdemo.service;
 
+import gr.codehub.eshopdemo.dto.CustomerDTO;
 import gr.codehub.eshopdemo.exception.CustomerNotFoundException;
+import gr.codehub.eshopdemo.mapper.CustomerMapper;
 import gr.codehub.eshopdemo.model.Customer;
 import gr.codehub.eshopdemo.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,26 +10,33 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
     @Override
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    public List<CustomerDTO> getAllCustomers() {
+        return customerRepository.findAll().stream()
+                .map(customerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Customer getCustomerById(Long id) {
-        return customerRepository.findById(id)
+    public CustomerDTO getCustomerById(Long id) {
+        Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
+        return customerMapper.toDTO(customer);
     }
 
     @Override
-    public Customer saveCustomer(Customer customer) {
-        return customerRepository.save(customer);
+    public CustomerDTO saveCustomer(CustomerDTO customerDTO) {
+        Customer customer = customerMapper.toEntity(customerDTO);
+        Customer savedCustomer = customerRepository.save(customer);
+        return customerMapper.toDTO(savedCustomer);
     }
 
     @Override
@@ -39,56 +48,58 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer updateCustomer(Long id, Customer updatedCustomer) {
+    public CustomerDTO updateCustomer(Long id, CustomerDTO updatedCustomerDTO) {
         Customer existingCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + id + " not found"));
 
-        existingCustomer.setName(updatedCustomer.getName());
-        existingCustomer.setEmail(updatedCustomer.getEmail());
-        existingCustomer.setAddress(updatedCustomer.getAddress());
+        existingCustomer.setName(updatedCustomerDTO.getName());
+        existingCustomer.setEmail(updatedCustomerDTO.getEmail());
+        existingCustomer.setAddress(updatedCustomerDTO.getAddress());
 
-        return customerRepository.save(existingCustomer);
+        Customer savedCustomer = customerRepository.save(existingCustomer);
+        return customerMapper.toDTO(savedCustomer);
     }
 
     @Override
-    public Customer getCustomerByEmail(String email) {
-        return customerRepository.findByEmail(email)
+    public CustomerDTO getCustomerByEmail(String email) {
+        Customer customer = customerRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with email " + email + " not found"));
+        return customerMapper.toDTO(customer);
     }
 
     @Override
-    public List<Customer> getCustomersByName(String name) {
+    public List<CustomerDTO> getCustomersByName(String name) {
         List<Customer> customers = customerRepository.findByName(name);
         if (customers.isEmpty()) {
             throw new CustomerNotFoundException("No customers found with name: " + name);
         }
-        return customers;
+        return customers.stream().map(customerMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<Customer> getCustomersByAddress(String address) {
+    public List<CustomerDTO> getCustomersByAddress(String address) {
         List<Customer> customers = customerRepository.findByAddress(address);
         if (customers.isEmpty()) {
             throw new CustomerNotFoundException("No customers found at address: " + address);
         }
-        return customers;
+        return customers.stream().map(customerMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<Customer> getCustomersCreatedAfter(LocalDateTime date) {
+    public List<CustomerDTO> getCustomersCreatedAfter(LocalDateTime date) {
         List<Customer> customers = customerRepository.findByCreatedAtAfter(date);
         if (customers.isEmpty()) {
             throw new CustomerNotFoundException("No customers created after: " + date);
         }
-        return customers;
+        return customers.stream().map(customerMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<Customer> getCustomersCreatedBefore(LocalDateTime date) {
+    public List<CustomerDTO> getCustomersCreatedBefore(LocalDateTime date) {
         List<Customer> customers = customerRepository.findByCreatedAtBefore(date);
         if (customers.isEmpty()) {
             throw new CustomerNotFoundException("No customers created before: " + date);
         }
-        return customers;
+        return customers.stream().map(customerMapper::toDTO).collect(Collectors.toList());
     }
 }

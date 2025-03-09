@@ -1,41 +1,29 @@
 package gr.codehub.eshopdemo.mapper;
 
 import gr.codehub.eshopdemo.dto.OrderDTO;
-import gr.codehub.eshopdemo.model.Customer;
 import gr.codehub.eshopdemo.model.Order;
-import gr.codehub.eshopdemo.model.Product;
-import gr.codehub.eshopdemo.service.CustomerService;
-import gr.codehub.eshopdemo.service.ProductService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
-public class OrderMapper {
-    private final CustomerService customerService;
-    private final ProductService productService;
+@Mapper(componentModel = "spring")
+public interface OrderMapper {
+    OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-    public OrderDTO toDTO(Order order) {
-        OrderDTO dto = new OrderDTO();
-        dto.setId(order.getId());
-        dto.setCustomerId(order.getCustomer().getId());
-        dto.setProductIds(order.getProducts().stream().map(Product::getId).collect(Collectors.toList()));
-        dto.setStatus(order.getStatus());
-        return dto;
-    }
+    @Mapping(target = "customerId", source = "customer.id")
+    @Mapping(target = "productIds", source = "products", qualifiedByName = "mapProductListToIds")
+    OrderDTO toDTO(Order order);
 
-    public Order toEntity(OrderDTO orderDTO) {
-        Order order = new Order();
-        Customer customer = customerService.getCustomerById(orderDTO.getCustomerId());
-        List<Product> products = orderDTO.getProductIds().stream()
-                .map(productService::getProductById)
-                .collect(Collectors.toList());
-        order.setCustomer(customer);
-        order.setProducts(products);
-        order.setStatus(orderDTO.getStatus());
-        return order;
+    @Mapping(target = "customer", ignore = true) // Will be set in Service Layer
+    @Mapping(target = "products", ignore = true) // Will be set in Service Layer
+    Order toEntity(OrderDTO orderDTO);
+
+    @Named("mapProductListToIds")
+    static List<Long> mapProductListToIds(List<gr.codehub.eshopdemo.model.Product> products) {
+        return products.stream().map(gr.codehub.eshopdemo.model.Product::getId).collect(Collectors.toList());
     }
 }

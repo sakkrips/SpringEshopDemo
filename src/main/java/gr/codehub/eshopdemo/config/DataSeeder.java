@@ -1,12 +1,12 @@
 package gr.codehub.eshopdemo.config;
 
 import com.github.javafaker.Faker;
-import gr.codehub.eshopdemo.model.Customer;
-import gr.codehub.eshopdemo.model.Order;
-import gr.codehub.eshopdemo.model.Product;
-import gr.codehub.eshopdemo.repository.CustomerRepository;
-import gr.codehub.eshopdemo.repository.OrderRepository;
-import gr.codehub.eshopdemo.repository.ProductRepository;
+import gr.codehub.eshopdemo.dto.CustomerDTO;
+import gr.codehub.eshopdemo.dto.OrderDTO;
+import gr.codehub.eshopdemo.dto.ProductDTO;
+import gr.codehub.eshopdemo.service.CustomerService;
+import gr.codehub.eshopdemo.service.OrderService;
+import gr.codehub.eshopdemo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -18,9 +18,9 @@ import java.util.Random;
 @Component
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
-    private final CustomerRepository customerRepository;
-    private final ProductRepository productRepository;
-    private final OrderRepository orderRepository;
+    private final CustomerService customerService;
+    private final ProductService productService;
+    private final OrderService orderService;
     private final Faker faker = new Faker();
     private final Random random = new Random();
 
@@ -28,21 +28,21 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         System.out.println(" Checking and Seeding Data...");
 
-        if (customerRepository.count() == 0) {
+        if (customerService.getAllCustomers().isEmpty()) {
             seedCustomers();
             System.out.println(" Customers Seeded");
         } else {
             System.out.println(" Customers already exist. Skipping...");
         }
 
-        if (productRepository.count() == 0) {
+        if (productService.getAllProducts().isEmpty()) {
             seedProducts();
             System.out.println(" Products Seeded");
         } else {
             System.out.println(" Products already exist. Skipping...");
         }
 
-        if (orderRepository.count() == 0) {
+        if (orderService.getAllOrders().isEmpty()) {
             seedOrders();
             System.out.println(" Orders Seeded");
         } else {
@@ -51,48 +51,51 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedCustomers() {
-        List<Customer> customers = new ArrayList<>();
+        List<CustomerDTO> customers = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            Customer customer = new Customer();
-            customer.setName(faker.name().fullName());
-            customer.setEmail(faker.internet().emailAddress());
-            customer.setAddress(faker.address().fullAddress());
-            customers.add(customer);
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setName(faker.name().fullName());
+            customerDTO.setEmail(faker.internet().emailAddress());
+            customerDTO.setAddress(faker.address().fullAddress());
+            customers.add(customerDTO);
         }
-        customerRepository.saveAll(customers);
+        customers.forEach(customerService::saveCustomer);
         System.out.println(" Customers Seeded ");
     }
 
-
     private void seedProducts() {
-        List<Product> products = new ArrayList<>();
+        List<ProductDTO> products = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            products.add(new Product(
-                    null,
-                    faker.commerce().productName(),
-                    faker.number().randomDouble(2, 5, 500)
-            ));
+            ProductDTO productDTO = new ProductDTO();
+            productDTO.setName(faker.commerce().productName());
+            productDTO.setPrice(faker.number().randomDouble(2, 5, 500));
+            products.add(productDTO);
         }
-        productRepository.saveAll(products);
+        products.forEach(productService::saveProduct);
     }
 
     private void seedOrders() {
-        List<Customer> customers = customerRepository.findAll();
-        List<Product> products = productRepository.findAll();
-        List<Order> orders = new ArrayList<>();
+        List<CustomerDTO> customers = customerService.getAllCustomers();
+        List<ProductDTO> products = productService.getAllProducts();
+        List<OrderDTO> orders = new ArrayList<>();
 
         for (int i = 0; i < 100; i++) {
-            Customer customer = customers.get(random.nextInt(customers.size()));
-            int productCount = random.nextInt(3) + 1; // Ensures at least 1 product
-            List<Product> orderProducts = products.subList(0, Math.min(productCount, products.size()));
+            CustomerDTO customer = customers.get(random.nextInt(customers.size()));
 
-            Order order = new Order();
-            order.setCustomer(customer);
-            order.setProducts(orderProducts);
-            order.setStatus(faker.options().option("Pending", "Shipped", "Delivered"));
+            // Select a random number of products (between 1 and 3)
+            int productCount = random.nextInt(3) + 1;
+            List<Long> productIds = new ArrayList<>();
+            for (int j = 0; j < productCount; j++) {
+                productIds.add(products.get(random.nextInt(products.size())).getId());
+            }
 
-            orders.add(order);
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setCustomerId(customer.getId());
+            orderDTO.setProductIds(productIds);
+            orderDTO.setStatus(faker.options().option("Pending", "Shipped", "Delivered"));
+
+            orders.add(orderDTO);
         }
-        orderRepository.saveAll(orders);
+        orders.forEach(orderService::saveOrder);
     }
 }

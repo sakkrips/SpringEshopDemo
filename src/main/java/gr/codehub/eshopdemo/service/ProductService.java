@@ -1,16 +1,13 @@
 package gr.codehub.eshopdemo.service;
 
-import gr.codehub.eshopdemo.model.Product;
+import gr.codehub.eshopdemo.dto.ProductDTO;
 import java.util.List;
 
-
 public interface ProductService {
-    List<Product> getAllProducts();
-    Product getProductById(Long id);
-    Product saveProduct(Product product);
+    List<ProductDTO> getAllProducts();
+    ProductDTO getProductById(Long id);
+    ProductDTO saveProduct(ProductDTO productDTO);
     void deleteProduct(Long id);
-    Product updateProduct(Long id, Product updatedProduct);
-    List<Product> getProductsByPriceRange(double minPrice, double maxPrice);
-
-
+    ProductDTO updateProduct(Long id, ProductDTO updatedProduct);
+    List<ProductDTO> getProductsByPriceRange(double minPrice, double maxPrice);
 }

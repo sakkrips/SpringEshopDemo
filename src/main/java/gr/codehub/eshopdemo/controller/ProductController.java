@@ -1,54 +1,42 @@
 package gr.codehub.eshopdemo.controller;
 
 import gr.codehub.eshopdemo.dto.ProductDTO;
-import gr.codehub.eshopdemo.mapper.ProductMapper;
-import gr.codehub.eshopdemo.model.Product;
 import gr.codehub.eshopdemo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    private final ProductMapper productMapper;
 
     @GetMapping
     public List<ProductDTO> getAllProducts() {
-        return productService.getAllProducts().stream()
-                .map(productMapper::toDTO)
-                .collect(Collectors.toList());
+        return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
-        Product product = productService.getProductById(id);
-        return ResponseEntity.ok(productMapper.toDTO(product));
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
-        Product product = productMapper.toEntity(productDTO);
-        Product savedProduct = productService.saveProduct(product);
-        return ResponseEntity.ok(productMapper.toDTO(savedProduct));
+        return ResponseEntity.ok(productService.saveProduct(productDTO));
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
-        Product updatedProduct = productService.updateProduct(id, productMapper.toEntity(productDTO));
-        return ResponseEntity.ok(productMapper.toDTO(updatedProduct));
+        return ResponseEntity.ok(productService.updateProduct(id, productDTO));
     }
 
     @GetMapping("/price-range")
     public ResponseEntity<List<ProductDTO>> getProductsByPriceRange(
             @RequestParam double minPrice, @RequestParam double maxPrice) {
-        List<Product> products = productService.getProductsByPriceRange(minPrice, maxPrice);
-        return ResponseEntity.ok(products.stream().map(productMapper::toDTO).toList());
+        return ResponseEntity.ok(productService.getProductsByPriceRange(minPrice, maxPrice));
     }
-
-
 }

@@ -2,28 +2,17 @@ package gr.codehub.eshopdemo.mapper;
 
 import gr.codehub.eshopdemo.dto.CustomerDTO;
 import gr.codehub.eshopdemo.model.Customer;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
-@Component
-public class CustomerMapper {
+@Mapper(componentModel = "spring")
+public interface CustomerMapper {
+    CustomerMapper INSTANCE = Mappers.getMapper(CustomerMapper.class);
 
-    public CustomerDTO toDTO(Customer customer) {
-        CustomerDTO dto = new CustomerDTO();
-        dto.setId(customer.getId());
-        dto.setName(customer.getName());
-        dto.setEmail(customer.getEmail());
-        dto.setAddress(customer.getAddress());
-        dto.setCreatedAt(customer.getCreatedAt());
-        return dto;
-    }
+    @Mapping(target = "createdAt", ignore = true) // Ignore fields that should not be mapped
+    CustomerDTO toDTO(Customer customer);
 
-    public Customer toEntity(CustomerDTO dto) {
-        Customer customer = new Customer();
-        customer.setId(dto.getId());
-        customer.setName(dto.getName());
-        customer.setEmail(dto.getEmail());
-        customer.setAddress(dto.getAddress());
-        customer.setCreatedAt(null);
-        return customer;
-    }
+    @Mapping(target = "createdAt", ignore = true) // Ignore createdAt when converting back
+    Customer toEntity(CustomerDTO customerDTO);
 }

@@ -1,32 +1,63 @@
 package gr.codehub.eshopdemo.service;
 
+import gr.codehub.eshopdemo.dto.OrderDTO;
+import gr.codehub.eshopdemo.exception.CustomerNotFoundException;
+import gr.codehub.eshopdemo.exception.OrderNotFoundException;
+import gr.codehub.eshopdemo.exception.ProductNotFoundException;
+import gr.codehub.eshopdemo.mapper.OrderMapper;
+import gr.codehub.eshopdemo.model.Customer;
 import gr.codehub.eshopdemo.model.Order;
+import gr.codehub.eshopdemo.model.Product;
+import gr.codehub.eshopdemo.repository.CustomerRepository;
 import gr.codehub.eshopdemo.repository.OrderRepository;
+import gr.codehub.eshopdemo.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import gr.codehub.eshopdemo.exception.OrderNotFoundException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
 
     @Override
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll().stream()
+                .map(orderMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Order getOrderById(Long id) {
-        return orderRepository.findById(id)
+    public OrderDTO getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order with ID " + id + " not found"));
+        return orderMapper.toDTO(order);
     }
 
     @Override
-    public Order saveOrder(Order order) {
-        return orderRepository.save(order);
+    public OrderDTO saveOrder(OrderDTO orderDTO) {
+        // Retrieve Customer
+        Customer customer = customerRepository.findById(orderDTO.getCustomerId())
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + orderDTO.getCustomerId() + " not found"));
+
+        // Retrieve Products
+        List<Product> products = orderDTO.getProductIds().stream()
+                .map(productId -> productRepository.findById(productId)
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + productId + " not found")))
+                .collect(Collectors.toList());
+
+        // Convert DTO to Entity
+        Order order = orderMapper.toEntity(orderDTO);
+        order.setCustomer(customer);
+        order.setProducts(products);
+
+        Order savedOrder = orderRepository.save(order);
+        return orderMapper.toDTO(savedOrder);
     }
 
     @Override
@@ -38,21 +69,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order updateOrder(Long id, Order updatedOrder) {
+    public OrderDTO updateOrder(Long id, OrderDTO updatedOrderDTO) {
         Order existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order with ID " + id + " not found"));
 
-        existingOrder.setCustomer(updatedOrder.getCustomer());
-        existingOrder.setProducts(updatedOrder.getProducts());
-        existingOrder.setStatus(updatedOrder.getStatus());
+        Customer customer = customerRepository.findById(updatedOrderDTO.getCustomerId())
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with ID " + updatedOrderDTO.getCustomerId() + " not found"));
 
-        return orderRepository.save(existingOrder);
+        List<Product> products = updatedOrderDTO.getProductIds().stream()
+                .map(productId -> productRepository.findById(productId)
+                        .orElseThrow(() -> new ProductNotFoundException("Product with ID " + productId + " not found")))
+                .collect(Collectors.toList());
+
+        existingOrder.setCustomer(customer);
+        existingOrder.setProducts(products);
+        existingOrder.setStatus(updatedOrderDTO.getStatus());
+
+        Order savedOrder = orderRepository.save(existingOrder);
+        return orderMapper.toDTO(savedOrder);
     }
 
     @Override
-    public List<Order> getOrdersByCustomerId(Long customerId) {
-        return orderRepository.findByCustomerId(customerId);
+    public List<OrderDTO> getOrdersByCustomerId(Long customerId) {
+        return orderRepository.findByCustomerId(customerId).stream()
+                .map(orderMapper::toDTO)
+                .collect(Collectors.toList());
     }
-
-
 }
