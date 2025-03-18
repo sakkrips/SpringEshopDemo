@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>gr.codehub</groupId>
+        <artifactId>eshopdemo-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>eshopdemo-application</artifactId>
+    <name>eshopdemo-application</name>
+    <description>Application module containing services and business logic</description>
+
+    <dependencies>
+        <!-- Domain Module -->
+        <dependency>
+            <groupId>gr.codehub</groupId>
+            <artifactId>eshopdemo-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- JavaFaker for data seeding -->
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>gr.codehub</groupId>
+            <artifactId>eshopdemo-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

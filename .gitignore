@@ -1,0 +1,23 @@
+# Ignore Maven Wrapper files
+.mvn/
+mvnw
+mvnw.cmd
+
+# Ignore compiled files and build artifacts
+target/
+*.class
+
+# Ignore compressed files
+*.zip
+*.rar
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+
+# Ignore IntelliJ IDEA files
+.idea/
+*.iml
